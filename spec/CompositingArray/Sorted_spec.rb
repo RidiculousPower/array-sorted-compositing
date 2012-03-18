@@ -984,5 +984,235 @@ describe ::CompositingArray::Sorted do
     sub_cascading_composite_array.should == [ ]
 
   end
-  
+
+  ##################
+  #  pre_set_hook  #
+  ##################
+
+  it 'has a hook that is called before setting a value; return value is used in place of object' do
+    
+    class ::CompositingArray::Sorted::SubMockPreSet < ::CompositingArray
+      
+      def pre_set_hook( index, object, is_insert = false )
+        return :some_other_value
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockPreSet.new
+
+    cascading_composite_array.push( :some_value )
+    
+    cascading_composite_array.should == [ :some_other_value ]
+    
+  end
+
+  ###################
+  #  post_set_hook  #
+  ###################
+
+  it 'has a hook that is called after setting a value' do
+
+    class ::CompositingArray::Sorted::SubMockPostSet < ::CompositingArray
+      
+      def post_set_hook( index, object, is_insert = false )
+        return :some_other_value
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockPostSet.new
+
+    cascading_composite_array.push( :some_value ).should == [ :some_other_value ]
+    
+    cascading_composite_array.should == [ :some_value ]
+    
+  end
+
+  ##################
+  #  pre_get_hook  #
+  ##################
+
+  it 'has a hook that is called before getting a value; if return value is false, get does not occur' do
+    
+    class ::CompositingArray::Sorted::SubMockPreGet < ::CompositingArray
+      
+      def pre_get_hook( index )
+        return false
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockPreGet.new
+    
+    cascading_composite_array.push( :some_value )
+    cascading_composite_array[ 0 ].should == nil
+    
+    cascading_composite_array.should == [ :some_value ]
+    
+  end
+
+  ###################
+  #  post_get_hook  #
+  ###################
+
+  it 'has a hook that is called after getting a value' do
+
+    class ::CompositingArray::Sorted::SubMockPostGet < ::CompositingArray
+      
+      def post_get_hook( index, object )
+        return :some_other_value
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockPostGet.new
+    
+    cascading_composite_array.push( :some_value )
+    cascading_composite_array[ 0 ].should == :some_other_value
+    
+    cascading_composite_array.should == [ :some_value ]
+    
+  end
+
+  #####################
+  #  pre_delete_hook  #
+  #####################
+
+  it 'has a hook that is called before deleting an index; if return value is false, delete does not occur' do
+    
+    class ::CompositingArray::Sorted::SubMockPreDelete < ::CompositingArray
+      
+      def pre_delete_hook( index )
+        return false
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockPreDelete.new
+    
+    cascading_composite_array.push( :some_value )
+    cascading_composite_array.delete_at( 0 )
+    
+    cascading_composite_array.should == [ :some_value ]
+    
+  end
+
+  ######################
+  #  post_delete_hook  #
+  ######################
+
+  it 'has a hook that is called after deleting an index' do
+    
+    class ::CompositingArray::Sorted::SubMockPostDelete < ::CompositingArray
+      
+      def post_delete_hook( index, object )
+        return :some_other_value
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockPostDelete.new
+    
+    cascading_composite_array.push( :some_value )
+    cascading_composite_array.delete_at( 0 ).should == :some_other_value
+    
+    cascading_composite_array.should == [ ]
+    
+  end
+
+  ########################
+  #  child_pre_set_hook  #
+  ########################
+
+  it 'has a hook that is called before setting a value that has been passed by a parent; return value is used in place of object' do
+    
+    class ::CompositingArray::Sorted::SubMockChildPreSet < ::CompositingArray
+      
+      def child_pre_set_hook( index, object, is_insert = false )
+        return :some_other_value
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPreSet.new
+    sub_cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPreSet.new( cascading_composite_array )
+    cascading_composite_array.push( :some_value )
+
+    sub_cascading_composite_array.should == [ :some_other_value ]
+    
+  end
+
+  #########################
+  #  child_post_set_hook  #
+  #########################
+
+  it 'has a hook that is called after setting a value passed by a parent' do
+
+    class ::CompositingArray::Sorted::SubMockChildPostSet < ::CompositingArray
+      
+      def child_post_set_hook( index, object, is_insert = false )
+        push( :some_other_value )
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPostSet.new
+    sub_cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPostSet.new( cascading_composite_array )
+    cascading_composite_array.push( :some_value )
+
+    cascading_composite_array.should == [ :some_value ]
+    sub_cascading_composite_array.should == [ :some_value, :some_other_value ]
+    
+  end
+
+  ###########################
+  #  child_pre_delete_hook  #
+  ###########################
+
+  it 'has a hook that is called before deleting an index that has been passed by a parent; if return value is false, delete does not occur' do
+
+    class ::CompositingArray::Sorted::SubMockChildPreDelete < ::CompositingArray
+      
+      def child_pre_delete_hook( index )
+        false
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPreDelete.new
+    sub_cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPreDelete.new( cascading_composite_array )
+    cascading_composite_array.push( :some_value )
+    cascading_composite_array.delete( :some_value )
+
+    cascading_composite_array.should == [  ]
+    sub_cascading_composite_array.should == [ :some_value ]
+    
+  end
+
+  ############################
+  #  child_post_delete_hook  #
+  ############################
+
+  it 'has a hook that is called after deleting an index passed by a parent' do
+
+    class ::CompositingArray::Sorted::SubMockChildPostDelete < ::CompositingArray
+      
+      def child_post_delete_hook( index, object )
+        delete( :some_other_value )
+      end
+      
+    end
+    
+    cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPostDelete.new
+    sub_cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPostDelete.new( cascading_composite_array )
+    cascading_composite_array.push( :some_value )
+    sub_cascading_composite_array.push( :some_other_value )
+    cascading_composite_array.delete( :some_value )
+
+    cascading_composite_array.should == [  ]
+    sub_cascading_composite_array.should == [ ]
+    
+  end
+    
 end
