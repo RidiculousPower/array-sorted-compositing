@@ -17,6 +17,8 @@ module ::CompositingArray::Sorted::Interface
       this_sub_array.reverse!
     end
     
+    return self
+    
   end
   
   ##############

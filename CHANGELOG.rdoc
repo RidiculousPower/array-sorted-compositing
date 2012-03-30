@@ -6,3 +6,7 @@ Initial release.
 == 3/18/12
 
 Added hooks for subclassing.
+
+== 3/30/12
+
+Added return self to end of reverse!
