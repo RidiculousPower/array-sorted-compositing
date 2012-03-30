@@ -3,6 +3,20 @@
 # with the unique compisiting array.
 module ::CompositingArray::Sorted::Interface
 
+  ################
+  #  initialize  #
+  ################
+
+  def initialize( parent_composite_array = nil, & sort_object_block )
+    
+    super( parent_composite_array )
+    
+    if block_given?
+      @sort_object_block = sort_object_block
+    end
+    
+  end
+  
   ##############
   #  reverse!  #
   ##############
@@ -52,7 +66,8 @@ module ::CompositingArray::Sorted::Interface
     if block_given?
       self.each_with_index do |this_member, index|
         unless index + 1 == count
-          yield( this_member, self[ index + 1 ] )
+          sort_object = @sort_object_block ? @sort_object_block.call( this_member ) : this_member
+          yield( sort_object, self[ index + 1 ] )
         end
       end
     end
@@ -70,7 +85,8 @@ module ::CompositingArray::Sorted::Interface
     return to_enum unless block_given?
   
     self.each do |this_member|
-      yield( this_member )
+      sort_object = @sort_object_block ? @sort_object_block.call( this_member ) : this_member
+      yield( sort_object )
     end
     
     return self
@@ -128,9 +144,15 @@ module ::CompositingArray::Sorted::Interface
       
       self.each_with_index do |this_member, this_index|
         
-        if @sort_order_reversed
+        insert_sort_object = @sort_object_block ? @sort_object_block.call( this_object ) 
+                                                : this_object
 
-          case this_object <=> this_member
+        existing_sort_object = @sort_object_block ? @sort_object_block.call( this_member ) 
+                                                  : this_member
+        
+        if @sort_order_reversed
+                    
+          case insert_sort_object <=> existing_sort_object
             when 0, 1
               super( this_index, this_object )
               insert_occurred = true
@@ -139,7 +161,7 @@ module ::CompositingArray::Sorted::Interface
           
         else
           
-          case this_object <=> this_member
+          case insert_sort_object <=> existing_sort_object
             when 0, -1
               super( this_index, this_object )
               insert_occurred = true
