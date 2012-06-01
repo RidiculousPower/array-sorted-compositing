@@ -7,9 +7,9 @@ module ::CompositingArray::Sorted::Interface
   #  initialize  #
   ################
 
-  def initialize( parent_composite_array = nil, & sort_object_block )
+  def initialize( parent_composite_array = nil, configuration_instance = nil, & sort_object_block )
     
-    super( parent_composite_array )
+    super( parent_composite_array, configuration_instance )
     
     if block_given?
       @sort_object_block = sort_object_block

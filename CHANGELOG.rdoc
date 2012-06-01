@@ -12,3 +12,7 @@ Added hooks for subclassing.
 Added return self to end of reverse!
 Added sort_block to :new to provide sorting by return value of block.
 
+== 6/1/12
+
+Added :configuration_instance parameter to :initialize.
+
