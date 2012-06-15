@@ -115,7 +115,6 @@ describe ::CompositingArray::Sorted do
     cascading_composite_array = ::CompositingArray::Sorted.new
     cascading_composite_array.push( :A, :B )
     sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
-    
     sub_cascading_composite_array.instance_eval do
       @local_index_for_parent_index[ 0 ].should == 0
       @local_index_for_parent_index[ 1 ].should == 1
