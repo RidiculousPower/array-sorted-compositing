@@ -16,3 +16,7 @@ Added sort_block to :new to provide sorting by return value of block.
 
 Added :configuration_instance parameter to :initialize.
 
+== 6/15/12
+
+Moved hooks out to sorted-array and utilized sorted-array as foundation.
+
