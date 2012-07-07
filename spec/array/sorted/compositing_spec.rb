@@ -1,11 +1,7 @@
 
-if $__compositing_array__spec__development
-  require_relative '../../lib/compositing-array-sorted.rb'
-else
-  require 'compositing-array-sorted'
-end
+require_relative '../../../lib/array-sorted-compositing.rb'
 
-describe ::CompositingArray::Sorted do
+describe ::Array::Sorted::Compositing do
 
   ################
   #  initialize  #
@@ -13,149 +9,18 @@ describe ::CompositingArray::Sorted do
 
   it 'can add initialize with an ancestor, inheriting its values and linking to it as a child' do
   
-    cascading_composite_array = ::CompositingArray::Sorted.new
+    cascading_composite_array = ::Array::Sorted::Compositing.new
 
     cascading_composite_array.instance_variable_get( :@parent_composite_object ).should == nil
-    cascading_composite_array.should == []
+    cascading_composite_array.should == [ ]
+
     cascading_composite_array.push( :A, :B, :C, :D )
 
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
     sub_cascading_composite_array.instance_variable_get( :@parent_composite_object ).should == cascading_composite_array
     sub_cascading_composite_array.should == [ :A, :B, :C, :D ]
 
   end
-
-  ##################################################################################################
-  #    private #####################################################################################
-  ##################################################################################################
-
-  ##################################################
-  #  update_corresponding_index_for_parent_change  #
-  ##################################################
-
-  it 'can update tracked parent indices for parent insert/delete' do
-
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    cascading_composite_array.push( :A, :B )
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
-    
-    sub_cascading_composite_array.instance_eval do
-      @local_index_for_parent_index[ 0 ].should == 0
-      @local_index_for_parent_index[ 1 ].should == 1
-      @local_index_for_parent_index[ 2 ].should == nil
-      # insert 1 in parent before parent-1
-      update_corresponding_index_for_parent_change( 1, 1 )
-      @local_index_for_parent_index[ 0 ].should == 0
-      # no longer a parent-1 index (has to be set separately)
-      @local_index_for_parent_index[ 1 ].should == nil
-      # parent-1 is now parent-2
-      @local_index_for_parent_index[ 2 ].should == 2
-      @parent_and_interpolated_object_count.should == 3
-    end
-  
-  end
-
-  #################################################
-  #  update_corresponding_index_for_local_change  #
-  #################################################
-
-  it 'can update tracked parent indices for local insert/delete' do
-
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    cascading_composite_array.push( :A, :B )
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
-    
-    sub_cascading_composite_array.instance_eval do
-      @local_index_for_parent_index[ 0 ].should == 0
-      @local_index_for_parent_index[ 1 ].should == 1
-      @local_index_for_parent_index[ 2 ].should == nil
-      # insert 1 before parent-1
-      update_corresponding_index_for_local_change( 1, 1 )
-      @local_index_for_parent_index[ 0 ].should == 0
-      # new index for parent-1 is 2
-      @local_index_for_parent_index[ 1 ].should == 2
-      @local_index_for_parent_index[ 2 ].should == nil
-      @parent_and_interpolated_object_count.should == 3
-    end
-    
-  end
-
-  ###########################################
-  #  update_as_sub_array_for_parent_insert  #
-  ###########################################
-
-  it 'can handle updating itself as a sub-array when told an insert has occurred in parent' do
-
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    cascading_composite_array.push( :A, :B )
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
-    
-    sub_cascading_composite_array.instance_eval do
-      @local_index_for_parent_index[ 0 ].should == 0
-      @local_index_for_parent_index[ 1 ].should == 1
-      @local_index_for_parent_index[ 2 ].should == nil
-      # insert 1 before parent-1
-      update_as_sub_array_for_parent_insert( 1, :C )
-      @local_index_for_parent_index[ 0 ].should == 0
-      # new parent index parent-1 inserted for :C
-      @local_index_for_parent_index[ 1 ].should == 1
-      # new index for parent-1 is parent-2
-      @local_index_for_parent_index[ 2 ].should == 2
-      @parent_and_interpolated_object_count.should == 3
-    end
-    
-  end
-
-  ########################################
-  #  update_as_sub_array_for_parent_set  #
-  ########################################
-
-  it 'can handle updating itself as a sub-array when told a set has occurred in parent' do
-    
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    cascading_composite_array.push( :A, :B )
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
-    sub_cascading_composite_array.instance_eval do
-      @local_index_for_parent_index[ 0 ].should == 0
-      @local_index_for_parent_index[ 1 ].should == 1
-      @local_index_for_parent_index[ 2 ].should == nil
-      # set for parent-1
-      update_as_sub_array_for_parent_set( 1, :C )
-      @local_index_for_parent_index[ 0 ].should == 0
-      @local_index_for_parent_index[ 1 ].should == 0
-      @local_index_for_parent_index[ 2 ].should == nil
-      @parent_and_interpolated_object_count.should == 2
-    end
-    
-  end
-
-  ###########################################
-  #  update_as_sub_array_for_parent_delete  #
-  ###########################################
-
-  it 'can handle updating itself as a sub-array when told a delete has occurred in parent' do
-    
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    cascading_composite_array.push( :A, :B )
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
-    
-    sub_cascading_composite_array.instance_eval do
-      @local_index_for_parent_index[ 0 ].should == 0
-      @local_index_for_parent_index[ 1 ].should == 1
-      @local_index_for_parent_index[ 2 ].should == nil
-      # delete parent-1
-      update_as_sub_array_for_parent_delete( 1 )
-      @local_index_for_parent_index[ 0 ].should == 0
-      @local_index_for_parent_index[ 1 ].should == 1
-      @local_index_for_parent_index[ 2 ].should == nil
-      @parent_and_interpolated_object_count.should == 1
-    end
-    
-  end
-  
-  ##################################################################################################
-  #    public ######################################################################################
-  ##################################################################################################
   
   #########
   #  []=  #
@@ -163,8 +28,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can add elements' do
   
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array[ 0 ] = :A
     cascading_composite_array.should == [ :A ]
@@ -188,7 +53,7 @@ describe ::CompositingArray::Sorted do
 
     cascading_composite_array[ 0 ] = :D
     cascading_composite_array.should == [ :B, :D ]
-    sub_cascading_composite_array.should == [ :C, :C ]
+    sub_cascading_composite_array.should == [ :B, :C, :C ]
 
   end
   
@@ -198,8 +63,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can insert elements' do
   
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.insert( 3, :D )
     cascading_composite_array.should == [ nil, nil, nil, :D ]
@@ -207,6 +72,7 @@ describe ::CompositingArray::Sorted do
 
     cascading_composite_array.insert( 1, :B )
     cascading_composite_array.should == [ nil, nil, nil, :B, :D ]
+
     sub_cascading_composite_array.should == [ nil, nil, nil, :B, :D ]
 
     cascading_composite_array.insert( 2, :C )
@@ -230,8 +96,8 @@ describe ::CompositingArray::Sorted do
   
   it 'can add elements' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array << :A
     cascading_composite_array.should == [ :A ]
@@ -261,8 +127,8 @@ describe ::CompositingArray::Sorted do
     # NOTE: this breaks + by causing it to modify the array like +=
     # The alternative was worse.
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.concat( [ :A ] )
     cascading_composite_array.should == [ :A ]
@@ -288,8 +154,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can delete multiple elements' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array += [ :A, :B ]
     cascading_composite_array.should == [ :A, :B ]
@@ -315,8 +181,8 @@ describe ::CompositingArray::Sorted do
   
   it 'can exclude elements' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A )
     cascading_composite_array.should == [ :A ]
@@ -346,8 +212,8 @@ describe ::CompositingArray::Sorted do
   
   it 'can delete elements' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A )
     cascading_composite_array.should == [ :A ]
@@ -377,8 +243,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can delete by indexes' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A )
     cascading_composite_array.should == [ :A ]
@@ -408,8 +274,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can delete by indexes' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -435,8 +301,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can delete by block' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -466,8 +332,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can keep by block' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -495,8 +361,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can compact' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, nil, :B, nil, :C, nil )
     cascading_composite_array.should == [ nil, nil, nil, :A, :B, :C ]
@@ -520,8 +386,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can flatten' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, [ :F_A, :F_B ], :B, [ :F_C ], :C, [ :F_D ], [ :F_E ] )
     cascading_composite_array.should == [ :A, [ :F_A, :F_B ], :B, [ :F_C ], :C, [ :F_D ], [ :F_E ] ]
@@ -545,8 +411,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can reject' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -576,8 +442,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can replace self' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -600,8 +466,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can reverse self' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -624,8 +490,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can rotate self' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -651,8 +517,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can keep by select' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -682,8 +548,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can shuffle self' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -708,8 +574,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can replace by collect/map' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -736,8 +602,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can replace by collect/map' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -778,8 +644,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can replace by collect/map' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C )
     cascading_composite_array.should == [ :A, :B, :C ]
@@ -820,8 +686,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can remove non-unique elements' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array.push( :A, :B, :C, :C, :C, :B, :A )
     cascading_composite_array.should == [ :A, :A, :B, :B, :C, :C, :C ]
@@ -845,8 +711,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can unshift onto the first element' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array += :A
     cascading_composite_array.should == [ :A ]
@@ -868,8 +734,8 @@ describe ::CompositingArray::Sorted do
   
   it 'can pop the final element' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array += :A
     cascading_composite_array.should == [ :A ]
@@ -898,8 +764,8 @@ describe ::CompositingArray::Sorted do
   
   it 'can shift the first element' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array += :A
     cascading_composite_array.should == [ :A ]
@@ -928,8 +794,8 @@ describe ::CompositingArray::Sorted do
   
   it 'can slice elements' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array += :A
     cascading_composite_array.should == [ :A ]
@@ -959,8 +825,8 @@ describe ::CompositingArray::Sorted do
 
   it 'can clear, causing present elements to be excluded' do
 
-    cascading_composite_array = ::CompositingArray::Sorted.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
 
     cascading_composite_array += :A
     cascading_composite_array.should == [ :A ]
@@ -990,7 +856,7 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called before setting a value; return value is used in place of object' do
     
-    class ::CompositingArray::Sorted::SubMockPreSet < ::CompositingArray
+    class ::Array::Sorted::Compositing::SubMockPreSet < ::Array::Sorted::Compositing
       
       def pre_set_hook( index, object, is_insert = false )
         return :some_other_value
@@ -998,7 +864,7 @@ describe ::CompositingArray::Sorted do
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockPreSet.new
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockPreSet.new
 
     cascading_composite_array.push( :some_value )
     
@@ -1012,15 +878,15 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called after setting a value' do
 
-    class ::CompositingArray::Sorted::SubMockPostSet < ::CompositingArray
-      
+    class ::Array::Sorted::Compositing::SubMockPostSet < ::Array::Sorted::Compositing
+
       def post_set_hook( index, object, is_insert = false )
         return :some_other_value
       end
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockPostSet.new
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockPostSet.new
 
     cascading_composite_array.push( :some_value ).should == [ :some_other_value ]
     
@@ -1034,7 +900,7 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called before getting a value; if return value is false, get does not occur' do
     
-    class ::CompositingArray::Sorted::SubMockPreGet < ::CompositingArray
+    class ::Array::Sorted::Compositing::SubMockPreGet < ::Array::Sorted::Compositing
       
       def pre_get_hook( index )
         return false
@@ -1042,7 +908,7 @@ describe ::CompositingArray::Sorted do
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockPreGet.new
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockPreGet.new
     
     cascading_composite_array.push( :some_value )
     cascading_composite_array[ 0 ].should == nil
@@ -1057,7 +923,7 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called after getting a value' do
 
-    class ::CompositingArray::Sorted::SubMockPostGet < ::CompositingArray
+    class ::Array::Sorted::Compositing::SubMockPostGet < ::Array::Sorted::Compositing
       
       def post_get_hook( index, object )
         return :some_other_value
@@ -1065,7 +931,7 @@ describe ::CompositingArray::Sorted do
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockPostGet.new
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockPostGet.new
     
     cascading_composite_array.push( :some_value )
     cascading_composite_array[ 0 ].should == :some_other_value
@@ -1080,7 +946,7 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called before deleting an index; if return value is false, delete does not occur' do
     
-    class ::CompositingArray::Sorted::SubMockPreDelete < ::CompositingArray
+    class ::Array::Sorted::Compositing::SubMockPreDelete < ::Array::Sorted::Compositing
       
       def pre_delete_hook( index )
         return false
@@ -1088,7 +954,7 @@ describe ::CompositingArray::Sorted do
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockPreDelete.new
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockPreDelete.new
     
     cascading_composite_array.push( :some_value )
     cascading_composite_array.delete_at( 0 )
@@ -1103,7 +969,7 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called after deleting an index' do
     
-    class ::CompositingArray::Sorted::SubMockPostDelete < ::CompositingArray
+    class ::Array::Sorted::Compositing::SubMockPostDelete < ::Array::Sorted::Compositing
       
       def post_delete_hook( index, object )
         return :some_other_value
@@ -1111,7 +977,7 @@ describe ::CompositingArray::Sorted do
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockPostDelete.new
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockPostDelete.new
     
     cascading_composite_array.push( :some_value )
     cascading_composite_array.delete_at( 0 ).should == :some_other_value
@@ -1126,7 +992,7 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called before setting a value that has been passed by a parent; return value is used in place of object' do
     
-    class ::CompositingArray::Sorted::SubMockChildPreSet < ::CompositingArray
+    class ::Array::Sorted::Compositing::SubMockChildPreSet < ::Array::Sorted::Compositing
       
       def child_pre_set_hook( index, object, is_insert = false )
         return :some_other_value
@@ -1134,8 +1000,8 @@ describe ::CompositingArray::Sorted do
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPreSet.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPreSet.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockChildPreSet.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing::SubMockChildPreSet.new( cascading_composite_array )
     cascading_composite_array.push( :some_value )
 
     sub_cascading_composite_array.should == [ :some_other_value ]
@@ -1148,7 +1014,7 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called after setting a value passed by a parent' do
 
-    class ::CompositingArray::Sorted::SubMockChildPostSet < ::CompositingArray
+    class ::Array::Sorted::Compositing::SubMockChildPostSet < ::Array::Sorted::Compositing
       
       def child_post_set_hook( index, object, is_insert = false )
         push( :some_other_value )
@@ -1156,12 +1022,12 @@ describe ::CompositingArray::Sorted do
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPostSet.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPostSet.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockChildPostSet.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing::SubMockChildPostSet.new( cascading_composite_array )
     cascading_composite_array.push( :some_value )
 
     cascading_composite_array.should == [ :some_value ]
-    sub_cascading_composite_array.should == [ :some_value, :some_other_value ]
+    sub_cascading_composite_array.should == [ :some_other_value, :some_value ]
     
   end
 
@@ -1171,7 +1037,7 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called before deleting an index that has been passed by a parent; if return value is false, delete does not occur' do
 
-    class ::CompositingArray::Sorted::SubMockChildPreDelete < ::CompositingArray
+    class ::Array::Sorted::Compositing::SubMockChildPreDelete < ::Array::Sorted::Compositing
       
       def child_pre_delete_hook( index )
         false
@@ -1179,8 +1045,8 @@ describe ::CompositingArray::Sorted do
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPreDelete.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPreDelete.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockChildPreDelete.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing::SubMockChildPreDelete.new( cascading_composite_array )
     cascading_composite_array.push( :some_value )
     cascading_composite_array.delete( :some_value )
 
@@ -1195,7 +1061,7 @@ describe ::CompositingArray::Sorted do
 
   it 'has a hook that is called after deleting an index passed by a parent' do
 
-    class ::CompositingArray::Sorted::SubMockChildPostDelete < ::CompositingArray
+    class ::Array::Sorted::Compositing::SubMockChildPostDelete < ::Array::Sorted::Compositing
       
       def child_post_delete_hook( index, object )
         delete( :some_other_value )
@@ -1203,8 +1069,8 @@ describe ::CompositingArray::Sorted do
       
     end
     
-    cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPostDelete.new
-    sub_cascading_composite_array = ::CompositingArray::Sorted::SubMockChildPostDelete.new( cascading_composite_array )
+    cascading_composite_array = ::Array::Sorted::Compositing::SubMockChildPostDelete.new
+    sub_cascading_composite_array = ::Array::Sorted::Compositing::SubMockChildPostDelete.new( cascading_composite_array )
     cascading_composite_array.push( :some_value )
     sub_cascading_composite_array.push( :some_other_value )
     cascading_composite_array.delete( :some_value )

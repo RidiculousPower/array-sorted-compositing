@@ -1,10 +1,10 @@
 # Sorted Compositing Array #
 
-http://rubygems.org/gems/compositing-array-sorted
+http://rubygems.org/gems/array-sorted-compositing
 
 # Description #
 
-Provides CompositingArray::Sorted.
+Provides Array::Sorted::Compositing.
 
 # Summary #
 
@@ -12,13 +12,13 @@ An implementation of Array that permits chaining, where children inherit changes
 
 # Install #
 
-* sudo gem install compositing-array-sorted
+* sudo gem install array-sorted-compositing
 
 # Usage #
 
 ```ruby
-compositing_array = CompositingArray::Sorted.new
-sub_compositing_array = CompositingArray::Sorted.new( compositing_array )
+compositing_array = Array::Sorted::Compositing.new
+sub_compositing_array = Array::Sorted::Compositing.new( compositing_array )
 
 compositing_array.push( :A )
 # compositing_array
