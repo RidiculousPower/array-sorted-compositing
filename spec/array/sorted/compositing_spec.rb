@@ -1027,6 +1027,7 @@ describe ::Array::Sorted::Compositing do
     cascading_composite_array.push( :some_value )
 
     cascading_composite_array.should == [ :some_value ]
+
     sub_cascading_composite_array.should == [ :some_other_value, :some_value ]
     
   end

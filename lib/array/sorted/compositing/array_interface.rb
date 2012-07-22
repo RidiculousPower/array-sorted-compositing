@@ -19,5 +19,21 @@ module ::Array::Sorted::Compositing::ArrayInterface
     end
     
   end
+
+  ######################################################################################################################
+      private ##########################################################################################################
+  ######################################################################################################################
+
+  ##############################
+  #  update_for_parent_insert  #
+  ##############################
+
+  def update_for_parent_insert( requested_parent_index, parent_index, object )
+    
+    unless @parent_index_map.replaced_parent_element_with_parent_index?( requested_parent_index )
+      super
+    end
+    
+  end
         
 end

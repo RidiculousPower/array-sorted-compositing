@@ -1,8 +1,8 @@
 
+begin ; require 'development' ; rescue ; end
+
 require 'array/sorted'
 require 'array/compositing'
-#require_relative '../../../../../hooked_objects/array-sorted/lib/array-sorted.rb'
-#require_relative '../../../../array-compositing/lib/array-compositing.rb'
 
 # namespaces that have to be declared ahead of time for proper load order
 require_relative './namespaces'
