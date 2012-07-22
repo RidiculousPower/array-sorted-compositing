@@ -30,7 +30,11 @@ module ::Array::Sorted::Compositing::ArrayInterface
 
   def update_for_parent_insert( requested_parent_index, parent_index, object )
     
-    unless @parent_index_map.replaced_parent_element_with_parent_index?( requested_parent_index )
+    # if requested index is not the same as sorted index we want to delete requested index
+    # that means if child doesn't have it to delete we don't want to do anything for child
+    
+    unless requested_parent_index != parent_index and
+           @parent_index_map.replaced_parent_element_with_parent_index?( requested_parent_index )
       super
     end
     
