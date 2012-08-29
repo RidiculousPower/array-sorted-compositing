@@ -12,7 +12,7 @@ module ::Array::Sorted::Compositing::ArrayInterface
     
     super
     
-    @sub_composite_arrays.each do |this_sub_array|
+    @child_composite_arrays.each do |this_sub_array|
       this_sub_array.instance_eval do
         parent_reversed!
       end
