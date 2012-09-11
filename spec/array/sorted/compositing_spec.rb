@@ -10,14 +10,16 @@ describe ::Array::Sorted::Compositing do
   it 'can add initialize with an ancestor, inheriting its values and linking to it as a child' do
   
     cascading_composite_array = ::Array::Sorted::Compositing.new
-
-    cascading_composite_array.instance_variable_get( :@parent_composite_object ).should == nil
+    cascading_composite_array.has_parents?.should == false
+    cascading_composite_array.parents.should == [ ]
     cascading_composite_array.should == [ ]
 
     cascading_composite_array.push( :A, :B, :C, :D )
 
     sub_cascading_composite_array = ::Array::Sorted::Compositing.new( cascading_composite_array )
-    sub_cascading_composite_array.instance_variable_get( :@parent_composite_object ).should == cascading_composite_array
+    sub_cascading_composite_array.has_parents?.should == true
+    sub_cascading_composite_array.parents.should == [ cascading_composite_array ]
+    sub_cascading_composite_array.has_parent?( cascading_composite_array ).should == true
     sub_cascading_composite_array.should == [ :A, :B, :C, :D ]
 
   end
@@ -994,7 +996,7 @@ describe ::Array::Sorted::Compositing do
     
     class ::Array::Sorted::Compositing::SubMockChildPreSet < ::Array::Sorted::Compositing
       
-      def child_pre_set_hook( index, object, is_insert = false )
+      def child_pre_set_hook( index, object, is_insert = false, parent_instance = nil )
         return :some_other_value
       end
       
@@ -1016,7 +1018,7 @@ describe ::Array::Sorted::Compositing do
 
     class ::Array::Sorted::Compositing::SubMockChildPostSet < ::Array::Sorted::Compositing
       
-      def child_post_set_hook( index, object, is_insert = false )
+      def child_post_set_hook( index, object, is_insert = false, parent_instance = nil )
         push( :some_other_value )
       end
       
@@ -1040,7 +1042,7 @@ describe ::Array::Sorted::Compositing do
 
     class ::Array::Sorted::Compositing::SubMockChildPreDelete < ::Array::Sorted::Compositing
       
-      def child_pre_delete_hook( index )
+      def child_pre_delete_hook( index, parent_instance = nil )
         false
       end
       
@@ -1064,7 +1066,7 @@ describe ::Array::Sorted::Compositing do
 
     class ::Array::Sorted::Compositing::SubMockChildPostDelete < ::Array::Sorted::Compositing
       
-      def child_post_delete_hook( index, object )
+      def child_post_delete_hook( index, object, parent_instance = nil )
         delete( :some_other_value )
       end
       
