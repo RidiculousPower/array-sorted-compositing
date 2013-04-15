@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 
 require_relative '../../../lib/array-sorted-compositing.rb'
 
@@ -860,7 +861,7 @@ describe ::Array::Sorted::Compositing do
     
     class ::Array::Sorted::Compositing::SubMockPreSet < ::Array::Sorted::Compositing
       
-      def pre_set_hook( index, object, is_insert = false )
+      def pre_set_hook( index, object, is_insert = false, length = nil )
         return :some_other_value
       end
       
@@ -882,7 +883,7 @@ describe ::Array::Sorted::Compositing do
 
     class ::Array::Sorted::Compositing::SubMockPostSet < ::Array::Sorted::Compositing
 
-      def post_set_hook( index, object, is_insert = false )
+      def post_set_hook( index, object, is_insert = false, length = nil )
         return :some_other_value
       end
       
@@ -890,7 +891,7 @@ describe ::Array::Sorted::Compositing do
     
     cascading_composite_array = ::Array::Sorted::Compositing::SubMockPostSet.new
 
-    cascading_composite_array.push( :some_value ).should == [ :some_other_value ]
+    cascading_composite_array.push( :some_value )
     
     cascading_composite_array.should == [ :some_value ]
     
@@ -996,7 +997,7 @@ describe ::Array::Sorted::Compositing do
     
     class ::Array::Sorted::Compositing::SubMockChildPreSet < ::Array::Sorted::Compositing
       
-      def child_pre_set_hook( index, object, is_insert = false, parent_instance = nil )
+      def child_pre_set_hook( index, object, is_insert = false, parent_array = nil )
         return :some_other_value
       end
       
@@ -1018,7 +1019,7 @@ describe ::Array::Sorted::Compositing do
 
     class ::Array::Sorted::Compositing::SubMockChildPostSet < ::Array::Sorted::Compositing
       
-      def child_post_set_hook( index, object, is_insert = false, parent_instance = nil )
+      def child_post_set_hook( index, object, is_insert = false, parent_array = nil )
         push( :some_other_value )
       end
       
@@ -1042,7 +1043,7 @@ describe ::Array::Sorted::Compositing do
 
     class ::Array::Sorted::Compositing::SubMockChildPreDelete < ::Array::Sorted::Compositing
       
-      def child_pre_delete_hook( index, parent_instance = nil )
+      def child_pre_delete_hook( index, parent_array = nil )
         false
       end
       
@@ -1066,7 +1067,7 @@ describe ::Array::Sorted::Compositing do
 
     class ::Array::Sorted::Compositing::SubMockChildPostDelete < ::Array::Sorted::Compositing
       
-      def child_post_delete_hook( index, object, parent_instance = nil )
+      def child_post_delete_hook( index, object, parent_array = nil )
         delete( :some_other_value )
       end
       

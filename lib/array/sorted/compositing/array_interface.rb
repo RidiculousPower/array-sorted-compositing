@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 
 module ::Array::Sorted::Compositing::ArrayInterface
   
@@ -26,27 +27,21 @@ module ::Array::Sorted::Compositing::ArrayInterface
   
   def shuffle!( random_number_generator = nil )
     
-    return false
+    return self
     
   end
-
-  ######################################################################################################################
-      private ##########################################################################################################
-  ######################################################################################################################
 
   ##############################
   #  update_for_parent_insert  #
   ##############################
 
-  def update_for_parent_insert( parent_instance, requested_parent_index, parent_index, object )
+  def update_for_parent_insert( parent_array, requested_parent_index, parent_index, object )
     
     # if requested index is not the same as sorted index we want to delete requested index
     # that means if child doesn't have it to delete we don't want to do anything for child
     
-    unless requested_parent_index != parent_index and
-           @parent_index_map.replaced_parent_element_with_parent_index?( parent_instance, requested_parent_index )
-      super
-    end
+    super unless requested_parent_index != parent_index and
+                 ! @cascade_controller.parent_controls_parent_index?( parent_array, requested_parent_index )
     
   end
         
