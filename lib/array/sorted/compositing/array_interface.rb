@@ -13,11 +13,7 @@ module ::Array::Sorted::Compositing::ArrayInterface
     
     super
     
-    @children.each do |this_sub_array|
-      this_sub_array.instance_eval do
-        parent_reversed!
-      end
-    end
+    @children.each { |this_sub_array| this_sub_array.parent_reversed! }
     
   end
   
@@ -26,6 +22,18 @@ module ::Array::Sorted::Compositing::ArrayInterface
   ##############
   
   def shuffle!( random_number_generator = nil )
+    
+    return self
+    
+  end
+
+  ###########
+  #  sort!  #
+  ###########
+  
+  def sort!( & block )
+    
+    super if block_given?
     
     return self
     
@@ -40,8 +48,15 @@ module ::Array::Sorted::Compositing::ArrayInterface
     # if requested index is not the same as sorted index we want to delete requested index
     # that means if child doesn't have it to delete we don't want to do anything for child
     
-    super unless requested_parent_index != parent_index and
-                 ! @cascade_controller.parent_controls_parent_index?( parent_array, requested_parent_index )
+    parent_local_map = @cascade_controller.parent_local_map( parent_array )
+
+    if requested_parent_index == parent_index                                                                      or
+       @cascade_controller.parent_controls_parent_index?( parent_array, requested_parent_index, parent_local_map ) or
+       requested_parent_index >= parent_local_map.size
+
+      super
+      
+    end
     
   end
         
